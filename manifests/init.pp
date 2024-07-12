@@ -158,40 +158,39 @@ class dynatraceoneagent (
   String $oneagent_networkzone_config_file    = $dynatraceoneagent::params::oneagent_networkzone_config_file,
 
 ) inherits dynatraceoneagent::params {
+  if $facts['kernel'] == 'Linux' {
+    $os_type = 'unix'
+  } elsif $facts['os']['family']  == 'AIX' {
+    $os_type = 'aix'
+  }
 
-    if $::kernel == 'Linux' {
-      $os_type = 'unix'
-    } elsif $::osfamily  == 'AIX' {
-      $os_type = 'aix'
-    }
+  if $oneagent_params_hash['INSTALL_PATH'] {
+    $install_dir = $oneagent_params_hash['INSTALL_PATH']
+  } else {
+    $install_dir = $default_install_dir
+  }
 
-    if $oneagent_params_hash['INSTALL_PATH']{
-      $install_dir = $oneagent_params_hash['INSTALL_PATH']
-    } else {
-      $install_dir = $default_install_dir
-    }
+  if $version == 'latest' {
+    $download_link  = "${tenant_url}${api_path}${os_type}/${installer_type}/latest/?Api-Token=${paas_token}&arch=${arch}"
+  } else {
+    $download_link  = "${tenant_url}${api_path}${os_type}/${installer_type}/version/${version}?Api-Token=${paas_token}&arch=${arch}"
+  }
 
-    if $version == 'latest' {
-      $download_link  = "${tenant_url}${api_path}${os_type}/${installer_type}/latest/?Api-Token=${paas_token}&arch=${arch}"
-    } else {
-      $download_link  = "${tenant_url}${api_path}${os_type}/${installer_type}/version/${version}?Api-Token=${paas_token}&arch=${arch}"
-    }
-
-    if $::osfamily == 'Windows' {
-      $filename                = "Dynatrace-OneAgent-${::osfamily}-${version}.exe"
-      $download_path           = "${download_dir}\\${filename}"
-      $created_dir             = "${install_dir}\\agent\\agent.state"
-      $oneagent_tools_dir      = "${install_dir}\\agent\\tools"
-    } elsif ($::kernel == 'Linux') or ($::osfamily  == 'AIX') {
-      $filename                 = "Dynatrace-OneAgent-${::kernel}-${version}.sh"
-      $download_path            = "${download_dir}/${filename}"
-      $dt_root_cert             = "${download_dir}/${cert_file_name}"
-      $oneagent_params_array    = $oneagent_params_hash.map |$key,$value| { "${key}=${value}" }
-      $oneagent_unix_params     = join($oneagent_params_array, ' ' )
-      $command                  = "/bin/sh ${download_path} ${oneagent_unix_params}"
-      $created_dir              = "${install_dir}/agent/agent.state"
-      $oneagent_tools_dir       = "${$install_dir}/agent/tools"
-    }
+  if $facts['os']['family'] == 'Windows' {
+    $filename                = "Dynatrace-OneAgent-${facts['os']['family']}-${version}.exe"
+    $download_path           = "${download_dir}\\${filename}"
+    $created_dir             = "${install_dir}\\agent\\agent.state"
+    $oneagent_tools_dir      = "${install_dir}\\agent\\tools"
+  } elsif ($facts['kernel'] == 'Linux') or ($facts['os']['family']  == 'AIX') {
+    $filename                 = "Dynatrace-OneAgent-${facts['kernel']}-${version}.sh"
+    $download_path            = "${download_dir}/${filename}"
+    $dt_root_cert             = "${download_dir}/${cert_file_name}"
+    $oneagent_params_array    = $oneagent_params_hash.map |$key,$value| { "${key}=${value}" }
+    $oneagent_unix_params     = join($oneagent_params_array, ' ' )
+    $command                  = "/bin/sh ${download_path} ${oneagent_unix_params}"
+    $created_dir              = "${install_dir}/agent/agent.state"
+    $oneagent_tools_dir       = "${$install_dir}/agent/tools"
+  }
 
   if $package_state != 'absent' {
     contain dynatraceoneagent::download
@@ -199,14 +198,13 @@ class dynatraceoneagent (
     contain dynatraceoneagent::config
     contain dynatraceoneagent::service
 
-    Class['::dynatraceoneagent::download']
-    -> Class['::dynatraceoneagent::install']
-    -> Class['::dynatraceoneagent::config']
-    -> Class['::dynatraceoneagent::service']
+    Class['dynatraceoneagent::download']
+    -> Class['dynatraceoneagent::install']
+    -> Class['dynatraceoneagent::config']
+    -> Class['dynatraceoneagent::service']
   } else {
     contain dynatraceoneagent::uninstall
 
-    Class['::dynatraceoneagent::uninstall']
+    Class['dynatraceoneagent::uninstall']
   }
-
 }
