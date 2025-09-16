@@ -9,7 +9,7 @@
 #    }
 #
 # @param global_mode
-#   Sets the permissions for any files that don't have 
+#   Sets the permissions for any files that don't have
 #   this assignment either set manually or by the OneAgent installer
 # @param tenant_url
 #   URL of your dynatrace Tenant
@@ -18,7 +18,7 @@
 #   Paas token for downloading the OneAgent installer
 # @param api_path
 #   Path of the Dynatrace OneAgent deployment API
-# @param version          
+# @param version
 #   The required version of the OneAgent in 1.155.275.20181112-084458 format
 # @param arch
 #   The architecture of your OS - default is all
@@ -59,12 +59,12 @@
 #   What state the dynatrace oneagent package should be in - default is present
 #   Allowed values: present, absent
 # @param host_tags
-#   Values to automatically add tags to a host, 
-#   should contain an array of strings or key/value pairs. 
+#   Values to automatically add tags to a host,
+#   should contain an array of strings or key/value pairs.
 #   For example: ['Environment=Prod', 'Organization=D1P', 'Owner=john.doe@dynatrace.com', 'Support=https://www.dynatrace.com/support/linux']
 # @param host_metadata
-#   Values to automatically add metadata to a host, 
-#   Should contain an array of strings or key/value pairs. 
+#   Values to automatically add metadata to a host,
+#   Should contain an array of strings or key/value pairs.
 #   For example: ['LinuxHost', 'Gdansk', 'role=fallback', 'app=easyTravel']
 # @param hostname
 #   Overrides an automatically detected host name. Example: My App Server
@@ -78,7 +78,9 @@
 # @param host_group
 #   Change host group assignment
 # @param infra_only
-#   Enable or disable Infrastructure Monitoring mode 
+#   Enable or disable Infrastructure Monitoring mode
+# @param infra_only
+#   Enable or disable Infrastructure Monitoring mode
 # @param network_zone
 #   Set the network zone for the host
 # @param oneagent_puppet_conf_dir
@@ -101,15 +103,17 @@
 #   Configuration file location for OneAgent host tag value(s)
 # @param hostname_config_file
 #   Configuration file location for OneAgent host name value
-# @param oneagent_infraonly_config_file
+# @param oneagent_monitoring_mode_config_file
 #   Configuration file location for OneAgent infra only mode
+# @param monitoring_mode
+#   Set mode to infra-only, fullstack(default), or discovery
 # @param oneagent_networkzone_config_file
 #   Configuration file location for OneAgent network zone value
 #
 class dynatraceoneagent (
   String $global_mode  = $dynatraceoneagent::params::global_mode,
 
-# OneAgent Download Parameters
+  # OneAgent Download Parameters
   String $tenant_url                    = $dynatraceoneagent::params::tenant_url,
   String $paas_token                    = $dynatraceoneagent::params::paas_token,
   String $api_path                      = $dynatraceoneagent::params::api_path,
@@ -124,18 +128,17 @@ class dynatraceoneagent (
   Optional[Boolean] $allow_insecure     = $dynatraceoneagent::params::allow_insecure,
   Optional $download_options            = $dynatraceoneagent::params::download_options,
 
-# OneAgent Install Parameters
+  # OneAgent Install Parameters
   String $download_dir                   = $dynatraceoneagent::params::download_dir,
   String $service_name                   = $dynatraceoneagent::params::service_name,
   String $provider                       = $dynatraceoneagent::params::provider,
   String $default_install_dir            = $dynatraceoneagent::params::default_install_dir,
-  Hash $oneagent_params_hash             = $dynatraceoneagent::params::oneagent_params_hash,
   Boolean $reboot_system                 = $dynatraceoneagent::params::reboot_system,
   String $service_state                  = $dynatraceoneagent::params::service_state,
   Boolean $manage_service                = $dynatraceoneagent::params::manage_service,
   String $package_state                  = $dynatraceoneagent::params::package_state,
 
-# OneAgent Host Configuration Parameters
+  # OneAgent Host Configuration Parameters
   Optional[Hash] $oneagent_communication_hash = $dynatraceoneagent::params::oneagent_communication_hash,
   Optional[Boolean] $log_monitoring           = $dynatraceoneagent::params::log_monitoring,
   Optional[Boolean] $log_access               = $dynatraceoneagent::params::log_access,
@@ -143,7 +146,8 @@ class dynatraceoneagent (
   Optional[Array] $host_tags                  = $dynatraceoneagent::params::host_tags,
   Optional[Array] $host_metadata              = $dynatraceoneagent::params::host_metadata,
   Optional[String] $hostname                  = $dynatraceoneagent::params::hostname,
-  Optional[Boolean] $infra_only               = $dynatraceoneagent::params::infra_only,
+  # Optional[Boolean] $infra_only               = $dynatraceoneagent::params::infra_only,
+  Enum['infra-only', 'fullstack', 'discovery'] $monitoring_mode = $dynatraceoneagent::params::monitoring_mode,
   Optional[String] $network_zone              = $dynatraceoneagent::params::network_zone,
   String $oneagent_ctl                        = $dynatraceoneagent::params::oneagent_ctl,
   String $oneagent_puppet_conf_dir            = $dynatraceoneagent::params::oneagent_puppet_conf_dir,
@@ -154,10 +158,16 @@ class dynatraceoneagent (
   String $hostautotag_config_file             = $dynatraceoneagent::params::hostautotag_config_file,
   String $hostmetadata_config_file            = $dynatraceoneagent::params::hostmetadata_config_file,
   String $hostname_config_file                = $dynatraceoneagent::params::hostname_config_file,
-  String $oneagent_infraonly_config_file      = $dynatraceoneagent::params::oneagent_infraonly_config_file,
+  String $oneagent_monitoring_mode_config_file      = $dynatraceoneagent::params::oneagent_monitoring_mode_config_file,
   String $oneagent_networkzone_config_file    = $dynatraceoneagent::params::oneagent_networkzone_config_file,
-
 ) inherits dynatraceoneagent::params {
+
+  # Build install parameters hash inside the class body
+  $oneagent_params_hash = {
+    '--set-monitoring-mode'        => $monitoring_mode,
+    '--set-app-log-content-access' => 'true',
+  }
+
   if $facts['kernel'] == 'Linux' {
     $os_type = 'unix'
   } elsif $facts['os']['family']  == 'AIX' {
@@ -189,7 +199,7 @@ class dynatraceoneagent (
     $oneagent_unix_params     = join($oneagent_params_array, ' ' )
     $command                  = "/bin/sh ${download_path} ${oneagent_unix_params}"
     $created_dir              = "${install_dir}/agent/agent.state"
-    $oneagent_tools_dir       = "${$install_dir}/agent/tools"
+    $oneagent_tools_dir       = "${install_dir}/agent/tools"
   }
 
   if $package_state != 'absent' {
