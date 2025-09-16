@@ -66,7 +66,7 @@ The following parameters are available in the `dynatraceoneagent` class:
 * [`log_monitoring`](#log_monitoring)
 * [`log_access`](#log_access)
 * [`host_group`](#host_group)
-* [`infra_only`](#infra_only)
+* [`monitoring_mode`](#monitoring_mode)
 * [`network_zone`](#network_zone)
 * [`oneagent_puppet_conf_dir`](#oneagent_puppet_conf_dir)
 * [`oneagent_ctl`](#oneagent_ctl)
@@ -78,7 +78,7 @@ The following parameters are available in the `dynatraceoneagent` class:
 * [`hostmetadata_config_file`](#hostmetadata_config_file)
 * [`hostautotag_config_file`](#hostautotag_config_file)
 * [`hostname_config_file`](#hostname_config_file)
-* [`oneagent_infraonly_config_file`](#oneagent_infraonly_config_file)
+* [`oneagent_monitoring_mode_config_file`](#oneagent_monitoring_mode_config_file)
 * [`oneagent_networkzone_config_file`](#oneagent_networkzone_config_file)
 
 ##### <a name="global_mode"></a>`global_mode`
@@ -324,13 +324,13 @@ Change host group assignment
 
 Default value: `$dynatraceoneagent::params::host_group`
 
-##### <a name="infra_only"></a>`infra_only`
+##### <a name="monitoring_mode"></a>`monitoring_mode`
 
-Data type: `Optional[Boolean]`
+Data type: `Optional[String]`
 
-Enable or disable Infrastructure Monitoring mode
+Set infra-only, fullstack (default), or discovery.
 
-Default value: `$dynatraceoneagent::params::infra_only`
+Default value: `$dynatraceoneagent::params::monitoring_mode`
 
 ##### <a name="network_zone"></a>`network_zone`
 
@@ -420,13 +420,13 @@ Configuration file location for OneAgent host name value
 
 Default value: `$dynatraceoneagent::params::hostname_config_file`
 
-##### <a name="oneagent_infraonly_config_file"></a>`oneagent_infraonly_config_file`
+##### <a name="oneagent_infraonly_config_file"></a>`oneagent_monitoring_mode_config_file`
 
 Data type: `String`
 
 Configuration file location for OneAgent infra only mode
 
-Default value: `$dynatraceoneagent::params::oneagent_infraonly_config_file`
+Default value: `$dynatraceoneagent::params::oneagent_monitoring_mode_config_file`
 
 ##### <a name="oneagent_networkzone_config_file"></a>`oneagent_networkzone_config_file`
 
