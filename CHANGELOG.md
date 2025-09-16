@@ -1,6 +1,47 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## Release 1.10.0
+
+## Features
+
+ - Replaced deprecated infra_only parameter with new monitoring_mode enum (infra-only, fullstack, discovery) to support enhanced agent installation modes.
+ - Updated default behavior to monitoring_mode = 'fullstack' to maintain compatibility with previous releases.
+ - Configuration logic now uses monitoring_mode to manage agent mode settings and associated config files.
+
+## Bugfixes
+
+ - ### Updating `init.pp` for Dynamic Monitoring Mode Support
+
+ - We refactored the Puppet module's `init.pp` to improve how the `monitoring_mode` parameter is handled for Dynatrace OneAgent installations.
+ - Previously, the install parameters hash (`oneagent_params_hash  - `) was generated in `params.pp` using a static value, which prevented external overrides (such as from the PE console or Hiera).
+
+ - **Key changes:**
+ - The `monitoring_mode` parameter is now settable from the PE console, Hiera, or directly in the class declaration.
+ - Construction of `oneagent_params_hash` was moved into the `init.pp` class body. This ensures the hash uses the effective value of `monitoring_mode` passed into the class, rather than always defaulting to the value in `params.pp`.
+ - This refactor allows dynamic selection of agent monitoring mode (e.g., `infra-only`, `fullstack`, or `discovery`) at deployment time, making the module more flexible and robust for various environments
+ - **Result:**
+ - The module now correctly applies the desired monitoring mode based on the value provided at classification, not just the default.
+ - This pattern is recommended for all parameters that may be externally overridden.
+
+## Known Issues
+
+ - None reported
+
+## Release 1.9.0
+
+### Features
+
+ - Provide option to disable puppet from managing the OneAgent service using the `manage_service` parameter
+ - Dynatrace root cert file is now directly passed with module instead of requiring archive for download
+
+### Bugfixes
+
+TBD
+
+### Known Issues
+
+TBD
 
 ## Release 1.9.0
 
