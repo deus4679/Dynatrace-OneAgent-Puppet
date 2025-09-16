@@ -19,16 +19,6 @@ class dynatraceoneagent::params {
   $cert_file_name     = 'dt-root.cert.pem'
   $ca_cert_src_path   = "modules/${module_name}/${cert_file_name}"
 
-  # OneAgent Install Parameters
-  $oneagent_params_hash = {
-    '--set-infra-only'             => 'false',
-    '--set-app-log-content-access' => 'true',
-  }
-  $reboot_system      = false
-  $service_state      = 'running'
-  $manage_service     = true
-  $package_state      = 'present'
-
   # OneAgent Host Configuration Parameters
   $host_tags                   = []
   $host_metadata               = []
@@ -37,8 +27,23 @@ class dynatraceoneagent::params {
   $log_monitoring              = undef
   $log_access                  = undef
   $host_group                  = undef
-  $infra_only                  = undef
+  #$infra_only                  = undef
+  # Removed infra_only and replaced with monitoring mode - 11/09/2025
+  $monitoring_mode             = fullstack  # choose an appropriate default [ fullstack | infra-only | discovery ]
   $network_zone                = undef
+
+  # OneAgent Install Parameters
+  # Removed infra_only and replaced with monitoring mode - 11/09/2025
+  $oneagent_params_hash = {
+    #'--set-infra-only'             => 'false',
+    #'--set-app-log-content-access' => 'true',
+    '--set-monitoring-mode'        => $monitoring_mode,
+    '--set-app-log-content-access' => 'true',
+  }
+  $reboot_system      = false
+  $service_state      = 'running'
+  $manage_service     = true
+  $package_state      = 'present'
 
   if $facts['os']['family'] == 'Windows' {
     #Parameters for Windows OneAgent Download
@@ -61,7 +66,7 @@ class dynatraceoneagent::params {
     $hostautotag_config_file            = "${oneagent_puppet_conf_dir}\\puppethostautotag.conf"
     $hostname_config_file               = "${oneagent_puppet_conf_dir}\\hostname.conf"
     $hostmetadata_config_file           = "${oneagent_puppet_conf_dir}\\hostcustomproperties.conf"
-    $oneagent_infraonly_config_file     = "${oneagent_puppet_conf_dir}\\infraonly.conf"
+    $oneagent_monitoring_mode_config_file     = "${oneagent_puppet_conf_dir}\\infraonly.conf"
     $oneagent_networkzone_config_file   = "${oneagent_puppet_conf_dir}\\networkzone.conf"
   } elsif ($facts['kernel'] == 'Linux') or ($facts['os']['family'] == 'AIX') {
     #Parameters for Linux/AIX OneAgent Download
@@ -82,7 +87,7 @@ class dynatraceoneagent::params {
     $hostautotag_config_file            = "${oneagent_puppet_conf_dir}/hostautotag.conf"
     $hostmetadata_config_file           = "${oneagent_puppet_conf_dir}/hostcustomproperties.conf"
     $hostname_config_file               = "${oneagent_puppet_conf_dir}/hostname.conf"
-    $oneagent_infraonly_config_file     = "${oneagent_puppet_conf_dir}/infraonly.conf"
+    $oneagent_monitoring_mode_config_file     = "${oneagent_puppet_conf_dir}/infraonly.conf"
     $oneagent_networkzone_config_file   = "${oneagent_puppet_conf_dir}/networkzone.conf"
   }
 }
