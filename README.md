@@ -37,7 +37,7 @@ For uninstalling the OneAgent on Windows, the [puppetlabs-powershell] module is 
 To begin using this module, use the Puppet Module Tool (PMT) from the command line to install this module:
 
 ```bash
-puppet module install dynatrace-dynatraceoneagent
+puppet module install deus-dynatraceoneagent
 ```
 
 You will then need to supply the dynatraceoneagent class with two critical pieces of information.
