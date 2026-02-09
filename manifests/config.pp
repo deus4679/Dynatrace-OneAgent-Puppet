@@ -8,7 +8,6 @@ class dynatraceoneagent::config {
   $service_name                        = $dynatraceoneagent::service_name
   $provider                            = $dynatraceoneagent::provider
   $install_dir                         = $dynatraceoneagent::install_dir
-  $created_dir                         = $dynatraceoneagent::created_dir
   $package_state                       = $dynatraceoneagent::package_state
   $service_state                       = $dynatraceoneagent::service_state
 
@@ -171,19 +170,19 @@ class dynatraceoneagent::config {
   #    ensure => absent,
   #  }
 
-        if $monitoring_mode != undef {
-        file { $oneagent_monitoring_mode_config_file:
-        ensure  => file,
-        content => $monitoring_mode,
-        notify  => Exec['set_monitoring_mode'],
-        mode    => $global_mode,
-        }
+	if $monitoring_mode != undef {
+  	file { $oneagent_monitoring_mode_config_file:
+    	ensure  => file,
+    	content => $monitoring_mode,
+    	notify  => Exec['set_monitoring_mode'],
+    	mode    => $global_mode,
+  	}
 
-        } else {
+	} else {
   file { $oneagent_monitoring_mode_config_file:
     ensure => absent,
-        }
-        }
+  	}
+	}
 
   if $network_zone {
     file { $oneagent_networkzone_config_file:
@@ -320,7 +319,7 @@ class dynatraceoneagent::config {
 #  }
 
   exec { 'set_monitoring_mode':
-    command             => "${oactl} --set-monitoring-mode=${monitoring_mode} --restart-service",
+    command 		=> "${oactl} --set-monitoring-mode=${monitoring_mode} --restart-service",
     path        => $oneagentctl_exec_path,
     cwd         => $oneagent_tools_dir,
     timeout     => 6000,
@@ -328,7 +327,7 @@ class dynatraceoneagent::config {
     logoutput   => on_failure,
     refreshonly => true,
   }
-
+	
 
   exec { 'set_network_zone':
     command     => "${oactl} --set-network-zone=${network_zone} --restart-service",

@@ -1,6 +1,53 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## Release 1.11.0
+
+### Features
+
+- None added in this release.
+
+### Bugfixes
+
+- ### Fix repeated OneAgent reinstall due to deprecated `agent.state` guard
+
+  - The module previously relied on the presence of the file `${install_dir}/agent/agent.state` as the `creates` attribute of the `Exec['install_oneagent']` resource.
+  - Recent Dynatrace OneAgent versions and console‑pushed auto‑updates no longer create or preserve this file, causing Puppet to believe the agent was not installed and re-run the installer on every agent converge.
+  - This resulted in repeated `(corrective)` executions of the install script and unnecessary restarts of the OneAgent service.
+
+  **Key Change:**
+  - The idempotency guard for `Exec['install_oneagent']` has been updated to use a presence check on the OneAgent control binary:
+    ```
+    unless => "${oneagent_tools_dir}/${oneagent_ctl} --version >/dev/null 2>&1"
+    ```
+  - This ensures the installer only runs when the OneAgent binary is missing or non-functional, preventing reinstall loops after auto-updates.
+
+  **Result:**
+  - The installer now behaves correctly and idempotently across all supported versions.
+  - OneAgent service restarts no longer occur on every Puppet run.
+
+- ### Prevent compile error and remove stale `created_dir` references in `download.pp`
+
+  - Removed the unused `$created_dir` variable from `dynatraceoneagent::download`.
+  - Removed `creates => $created_dir` from the `archive { $filename: ... }` resource (not required for idempotency when `ensure => present` and `extract => false` are used).
+  - Fixed an interpolation bug in the cleanup `exec` (`rm ${$download_path} ...` → `rm ${download_path} ...`), which could previously fail to parse.
+
+  **Result:**
+  - The catalog no longer errors with `Unknown variable: 'dynatraceoneagent::created_dir'`.
+  - Download logic remains idempotent and stable without relying on the deprecated `agent.state` marker.
+
+- ### Align `uninstall.pp` guard with stable OneAgent presence
+
+  - Replaced the `onlyif` test that referenced the deprecated `${install_dir}/agent/agent.state` with a presence check on `oneagentctl` under `${install_dir}/agent/tools/`.
+  - This mirrors the install guard approach and ensures uninstall only runs when OneAgent is actually present.
+
+  **Result:**
+  - Uninstall behavior is now consistent across versions and no longer depends on internal state files that may not exist after auto-updates.
+
+### Known Issues
+
+- None reported
+
 ## Release 1.10.0
 
 ## Features
@@ -13,15 +60,15 @@ All notable changes to this project will be documented in this file.
 
  - ### Updating `init.pp` for Dynamic Monitoring Mode Support
 
- - We refactored the Puppet module's `init.pp` to improve how the `monitoring_mode` parameter is handled for Dynatrace OneAgent installations.
+ - We refactored the Puppet module's `init.pp` to improve how the `monitoring_mode` parameter is handled for Dynatrace OneAgent installations. 
  - Previously, the install parameters hash (`oneagent_params_hash  - `) was generated in `params.pp` using a static value, which prevented external overrides (such as from the PE console or Hiera).
 
  - **Key changes:**
  - The `monitoring_mode` parameter is now settable from the PE console, Hiera, or directly in the class declaration.
  - Construction of `oneagent_params_hash` was moved into the `init.pp` class body. This ensures the hash uses the effective value of `monitoring_mode` passed into the class, rather than always defaulting to the value in `params.pp`.
  - This refactor allows dynamic selection of agent monitoring mode (e.g., `infra-only`, `fullstack`, or `discovery`) at deployment time, making the module more flexible and robust for various environments
- - **Result:**
- - The module now correctly applies the desired monitoring mode based on the value provided at classification, not just the default.
+ - **Result:**  
+ - The module now correctly applies the desired monitoring mode based on the value provided at classification, not just the default. 
  - This pattern is recommended for all parameters that may be externally overridden.
 
 ## Known Issues

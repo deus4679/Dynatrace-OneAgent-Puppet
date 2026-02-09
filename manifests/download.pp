@@ -8,7 +8,6 @@ class dynatraceoneagent::download {
     }
   }
 
-  $created_dir              = $dynatraceoneagent::created_dir
   $download_dir             = $dynatraceoneagent::download_dir
   $filename                 = $dynatraceoneagent::filename
   $download_path            = $dynatraceoneagent::download_path
@@ -40,14 +39,13 @@ class dynatraceoneagent::download {
       path             => $download_path,
       allow_insecure   => $allow_insecure,
       require          => File[$download_dir],
-      creates          => $created_dir,
       proxy_server     => $proxy_server,
       cleanup          => false,
       download_options => $download_options,
     }
   }
 
-  if ($facts['kernel'] == 'Linux' or $facts['os']['family']  == 'AIX') and ($dynatraceoneagent::verify_signature) and ($package_state != 'absent') {
+  if ($facts['kernel'] == 'Linux' or $facts['os']['family'] == 'AIX') and ($dynatraceoneagent::verify_signature) and ($package_state != 'absent') {
     file { $dynatraceoneagent::dt_root_cert:
       ensure  => file,
       mode    => $global_mode,
@@ -55,12 +53,12 @@ class dynatraceoneagent::download {
       require => File[$download_dir],
     }
 
-    $verify_signature_command = "( echo 'Content-Type: multipart/signed; protocol=\"application/x-pkcs7-signature\"; micalg=\"sha-256\";\
+    $verify_signature_command = "( echo 'Content-Type: multipart/signed; protocol=\"application/x-pkcs7-signature\"; micalg=\"sha-256\"; \
      boundary=\"--SIGNED-INSTALLER\"'; echo ; echo ; echo '----SIGNED-INSTALLER' ; \
      cat ${download_path} ) | openssl cms -verify -CAfile ${dynatraceoneagent::dt_root_cert} > /dev/null"
 
     exec { 'delete_oneagent_installer_script':
-      command   => "rm ${$download_path} ${dynatraceoneagent::dt_root_cert}",
+      command   => "rm ${download_path} ${dynatraceoneagent::dt_root_cert}",
       cwd       => $download_dir,
       timeout   => 6000,
       provider  => $provider,
@@ -70,7 +68,6 @@ class dynatraceoneagent::download {
         File[$dynatraceoneagent::dt_root_cert],
         Archive[$filename],
       ],
-      creates   => $created_dir,
     }
   }
 }

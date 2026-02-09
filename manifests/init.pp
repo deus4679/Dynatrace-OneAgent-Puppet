@@ -9,7 +9,7 @@
 #    }
 #
 # @param global_mode
-#   Sets the permissions for any files that don't have
+#   Sets the permissions for any files that don't have 
 #   this assignment either set manually or by the OneAgent installer
 # @param tenant_url
 #   URL of your dynatrace Tenant
@@ -18,7 +18,7 @@
 #   Paas token for downloading the OneAgent installer
 # @param api_path
 #   Path of the Dynatrace OneAgent deployment API
-# @param version
+# @param version          
 #   The required version of the OneAgent in 1.155.275.20181112-084458 format
 # @param arch
 #   The architecture of your OS - default is all
@@ -59,12 +59,12 @@
 #   What state the dynatrace oneagent package should be in - default is present
 #   Allowed values: present, absent
 # @param host_tags
-#   Values to automatically add tags to a host,
-#   should contain an array of strings or key/value pairs.
+#   Values to automatically add tags to a host, 
+#   should contain an array of strings or key/value pairs. 
 #   For example: ['Environment=Prod', 'Organization=D1P', 'Owner=john.doe@dynatrace.com', 'Support=https://www.dynatrace.com/support/linux']
 # @param host_metadata
-#   Values to automatically add metadata to a host,
-#   Should contain an array of strings or key/value pairs.
+#   Values to automatically add metadata to a host, 
+#   Should contain an array of strings or key/value pairs. 
 #   For example: ['LinuxHost', 'Gdansk', 'role=fallback', 'app=easyTravel']
 # @param hostname
 #   Overrides an automatically detected host name. Example: My App Server
@@ -78,9 +78,9 @@
 # @param host_group
 #   Change host group assignment
 # @param infra_only
-#   Enable or disable Infrastructure Monitoring mode
+#   Enable or disable Infrastructure Monitoring mode 
 # @param infra_only
-#   Enable or disable Infrastructure Monitoring mode
+#   Enable or disable Infrastructure Monitoring mode 
 # @param network_zone
 #   Set the network zone for the host
 # @param oneagent_puppet_conf_dir
@@ -189,7 +189,6 @@ class dynatraceoneagent (
   if $facts['os']['family'] == 'Windows' {
     $filename                = "Dynatrace-OneAgent-${facts['os']['family']}-${version}.exe"
     $download_path           = "${download_dir}\\${filename}"
-    $created_dir             = "${install_dir}\\agent\\agent.state"
     $oneagent_tools_dir      = "${install_dir}\\agent\\tools"
   } elsif ($facts['kernel'] == 'Linux') or ($facts['os']['family']  == 'AIX') {
     $filename                 = "Dynatrace-OneAgent-${facts['kernel']}-${version}.sh"
@@ -198,7 +197,6 @@ class dynatraceoneagent (
     $oneagent_params_array    = $oneagent_params_hash.map |$key,$value| { "${key}=${value}" }
     $oneagent_unix_params     = join($oneagent_params_array, ' ' )
     $command                  = "/bin/sh ${download_path} ${oneagent_unix_params}"
-    $created_dir              = "${install_dir}/agent/agent.state"
     $oneagent_tools_dir       = "${install_dir}/agent/tools"
   }
 

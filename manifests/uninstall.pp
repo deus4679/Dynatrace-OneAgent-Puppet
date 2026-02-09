@@ -1,12 +1,11 @@
 class dynatraceoneagent::uninstall {
   $provider                            = $dynatraceoneagent::provider
   $install_dir                         = $dynatraceoneagent::install_dir
-  $created_dir                         = $dynatraceoneagent::created_dir
 
   if ($facts['kernel'] == 'Linux' or $facts['os']['family'] == 'AIX') {
     exec { 'uninstall_oneagent':
       command   => "${install_dir}/agent/uninstall.sh",
-      onlyif    => "test -f '${created_dir}'",
+      onlyif    => "test -x '${install_dir}/agent/tools/${dynatraceoneagent::oneagent_ctl}' && '${install_dir}/agent/tools/${dynatraceoneagent::oneagent_ctl}' --version >/dev/null 2>&1",
       timeout   => 6000,
       provider  => $provider,
       logoutput => on_failure,
@@ -19,7 +18,7 @@ class dynatraceoneagent::uninstall {
 
     exec { 'uninstall_oneagent':
       command   => $uninstall_command,
-      onlyif    => "Test-Path -Path '${created_dir}' -PathType Leaf",
+      onlyif => "Test-Path -Path '${install_dir}\\agent\\tools\\${dynatraceoneagent::oneagent_ctl}' -PathType Leaf",
       timeout   => 6000,
       provider  => powershell,
       logoutput => on_failure,
