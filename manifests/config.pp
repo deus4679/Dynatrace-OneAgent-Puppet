@@ -10,7 +10,6 @@ class dynatraceoneagent::config {
   $install_dir                         = $dynatraceoneagent::install_dir
   $package_state                       = $dynatraceoneagent::package_state
   $service_state                       = $dynatraceoneagent::service_state
-
 # OneAgent Host Configuration Parameters
   $oneagent_tools_dir                  = $dynatraceoneagent::oneagent_tools_dir
   $oactl                               = $dynatraceoneagent::oneagent_ctl
@@ -21,7 +20,6 @@ class dynatraceoneagent::config {
   $host_tags                           = $dynatraceoneagent::host_tags
   $host_metadata                       = $dynatraceoneagent::host_metadata
   $hostname                            = $dynatraceoneagent::hostname
-  #$infra_only                          = $dynatraceoneagent::infra_only
   $monitoring_mode                     = $dynatraceoneagent::monitoring_mode
   $network_zone                        = $dynatraceoneagent::network_zone
   $oneagent_puppet_conf_dir            = $dynatraceoneagent::oneagent_puppet_conf_dir
@@ -34,8 +32,6 @@ class dynatraceoneagent::config {
   $hostname_config_file                = $dynatraceoneagent::hostname_config_file
   $oneagent_monitoring_mode_config_file      = $dynatraceoneagent::oneagent_monitoring_mode_config_file
   $oneagent_networkzone_config_file    = $dynatraceoneagent::oneagent_networkzone_config_file
-
-  #if ($service_state != 'stopped') {
 
   file { $oneagent_puppet_conf_dir :
     ensure  => 'directory',
@@ -110,9 +106,9 @@ class dynatraceoneagent::config {
       mode    => $global_mode,
     }
   } else {
+  # Do not unset HG - only have it unmanaged in puppet
     file { $hostgroup_config_file:
-      ensure => absent,
-      notify => Exec['unset_host_group'],
+      ensure => absent
     }
   }
 
@@ -124,9 +120,9 @@ class dynatraceoneagent::config {
       mode    => $global_mode,
     }
   } else {
+  # Do not unset tags - only have it unmanaged in puppet
     file { $hostautotag_config_file:
-      ensure => absent,
-      notify => Exec['unset_host_tags'],
+      ensure => absent
     }
   }
 
@@ -138,9 +134,9 @@ class dynatraceoneagent::config {
       mode    => $global_mode,
     }
   } else {
+  # Do not unset metadata - only have it unmanaged in puppet
     file { $hostmetadata_config_file:
-      ensure => absent,
-      notify => Exec['unset_host_metadata'],
+      ensure => absent
     }
   }
 
@@ -152,23 +148,11 @@ class dynatraceoneagent::config {
       mode    => $global_mode,
     }
   } else {
+  # Do not unset hostname - only have it unmanaged in puppet
     file { $hostname_config_file:
-      ensure => absent,
-      notify => Exec['unset_hostname'],
+      ensure => absent
     }
   }
-
-  #if $infra_only != undef {
-  #  file { $oneagent_monitoring_mode_config_file:
-  #    ensure  => file,
-  #    content => String($infra_only),
-  #    notify  => Exec['set_infra_only'],
-  #    mode    => $global_mode,
-  #  }
-  #} else {
-  #  file { $oneagent_monitoring_mode_config_file:
-  #    ensure => absent,
-  #  }
 
 	if $monitoring_mode != undef {
   	file { $oneagent_monitoring_mode_config_file:
@@ -192,9 +176,9 @@ class dynatraceoneagent::config {
       mode    => $global_mode,
     }
   } else {
+  # Do not unset networkzone - only have it unmanaged in puppet
     file { $oneagent_networkzone_config_file:
-      ensure => absent,
-      notify => Exec['unset_network_zone'],
+      ensure => absent
     }
   }
 
@@ -238,16 +222,6 @@ class dynatraceoneagent::config {
     refreshonly => true,
   }
 
-  exec { 'unset_host_group':
-    command     => "${oactl} --set-host-group= --restart-service",
-    path        => $oneagentctl_exec_path,
-    cwd         => $oneagent_tools_dir,
-    timeout     => 6000,
-    provider    => $provider,
-    logoutput   => on_failure,
-    refreshonly => true,
-  }
-
   exec { 'set_host_tags':
     command     => $oneagent_set_host_tags_command,
     path        => $oneagentctl_exec_path,
@@ -258,28 +232,9 @@ class dynatraceoneagent::config {
     refreshonly => true,
   }
 
-  exec { 'unset_host_tags':
-    command     => $oneagent_remove_host_tags_command,
-    path        => $oneagentctl_exec_path,
-    cwd         => $oneagent_tools_dir,
-    timeout     => 6000,
-    provider    => $provider,
-    logoutput   => on_failure,
-    refreshonly => true,
-  }
 
   exec { 'set_host_metadata':
     command     => $oneagent_set_host_metadata_command,
-    path        => $oneagentctl_exec_path,
-    cwd         => $oneagent_tools_dir,
-    timeout     => 6000,
-    provider    => $provider,
-    logoutput   => on_failure,
-    refreshonly => true,
-  }
-
-  exec { 'unset_host_metadata':
-    command     => $oneagent_remove_host_metadata_command,
     path        => $oneagentctl_exec_path,
     cwd         => $oneagent_tools_dir,
     timeout     => 6000,
@@ -297,26 +252,6 @@ class dynatraceoneagent::config {
     logoutput   => on_failure,
     refreshonly => true,
   }
-
-  exec { 'unset_hostname':
-    command     => "${oactl} --set-host-name=\"\" --restart-service",
-    path        => $oneagentctl_exec_path,
-    cwd         => $oneagent_tools_dir,
-    timeout     => 6000,
-    provider    => $provider,
-    logoutput   => on_failure,
-    refreshonly => true,
-  }
-
-#  exec { 'set_infra_only':
-#    command     => "${oactl} --set-infra-only=${infra_only} --restart-service",
-#    path        => $oneagentctl_exec_path,
-#    cwd         => $oneagent_tools_dir,
-#    timeout     => 6000,
-#    provider    => $provider,
-#    logoutput   => on_failure,
-#    refreshonly => true,
-#  }
 
   exec { 'set_monitoring_mode':
     command 		=> "${oactl} --set-monitoring-mode=${monitoring_mode} --restart-service",
@@ -339,14 +274,4 @@ class dynatraceoneagent::config {
     refreshonly => true,
   }
 
-  exec { 'unset_network_zone':
-    command     => "${oactl} --set-network-zone=\"\" --restart-service",
-    path        => $oneagentctl_exec_path,
-    cwd         => $oneagent_tools_dir,
-    timeout     => 6000,
-    provider    => $provider,
-    logoutput   => on_failure,
-    refreshonly => true,
-  }
-  #}
 }

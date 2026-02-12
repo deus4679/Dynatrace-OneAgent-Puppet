@@ -113,106 +113,98 @@
 class dynatraceoneagent (
   String $global_mode  = $dynatraceoneagent::params::global_mode,
 
-  # OneAgent Download Parameters
-  String $tenant_url                    = $dynatraceoneagent::params::tenant_url,
-  String $paas_token                    = $dynatraceoneagent::params::paas_token,
-  String $api_path                      = $dynatraceoneagent::params::api_path,
-  String $version                       = $dynatraceoneagent::params::version,
-  String $arch                          = $dynatraceoneagent::params::arch,
-  String $installer_type                = $dynatraceoneagent::params::installer_type,
-  Optional[Boolean] $verify_signature   = $dynatraceoneagent::params::verify_signature,
-  Optional[String] $proxy_server        = $dynatraceoneagent::params::proxy_server,
-  Optional[String] $download_cert_link  = $dynatraceoneagent::params::download_cert_link,
-  Optional[String] $cert_file_name      = $dynatraceoneagent::params::cert_file_name,
-  Optional[String] $ca_cert_src_path    = $dynatraceoneagent::params::ca_cert_src_path,
-  Optional[Boolean] $allow_insecure     = $dynatraceoneagent::params::allow_insecure,
-  Optional $download_options            = $dynatraceoneagent::params::download_options,
+  # --- Download parameters ---
+  String            $tenant_url        = $dynatraceoneagent::params::tenant_url,
+  String            $paas_token        = $dynatraceoneagent::params::paas_token,
+  String            $api_path          = $dynatraceoneagent::params::api_path,
+  String            $version           = $dynatraceoneagent::params::version,
+  String            $arch              = $dynatraceoneagent::params::arch,
+  String            $installer_type    = $dynatraceoneagent::params::installer_type,
+  Optional[Boolean] $verify_signature  = $dynatraceoneagent::params::verify_signature,
+  Optional[String]  $proxy_server      = $dynatraceoneagent::params::proxy_server,
+  Optional[String]  $download_cert_link= $dynatraceoneagent::params::download_cert_link,
+  Optional[String]  $cert_file_name    = $dynatraceoneagent::params::cert_file_name,
+  Optional[String]  $ca_cert_src_path  = $dynatraceoneagent::params::ca_cert_src_path,
+  Optional[Boolean] $allow_insecure    = $dynatraceoneagent::params::allow_insecure,
+  Optional          $download_options  = $dynatraceoneagent::params::download_options,
 
-  # OneAgent Install Parameters
-  String $download_dir                   = $dynatraceoneagent::params::download_dir,
-  String $service_name                   = $dynatraceoneagent::params::service_name,
-  String $provider                       = $dynatraceoneagent::params::provider,
-  String $default_install_dir            = $dynatraceoneagent::params::default_install_dir,
-  Boolean $reboot_system                 = $dynatraceoneagent::params::reboot_system,
-  String $service_state                  = $dynatraceoneagent::params::service_state,
-  Boolean $manage_service                = $dynatraceoneagent::params::manage_service,
-  String $package_state                  = $dynatraceoneagent::params::package_state,
+  # --- Install parameters ---
+  String  $download_dir        = $dynatraceoneagent::params::download_dir,
+  String  $service_name        = $dynatraceoneagent::params::service_name,
+  String  $provider            = $dynatraceoneagent::params::provider,
+  String  $default_install_dir = $dynatraceoneagent::params::default_install_dir,
+  Boolean $reboot_system       = $dynatraceoneagent::params::reboot_system,
+  String  $service_state       = $dynatraceoneagent::params::service_state,
+  Boolean $manage_service      = $dynatraceoneagent::params::manage_service,
+  String  $package_state       = $dynatraceoneagent::params::package_state,
 
-  # OneAgent Host Configuration Parameters
-  Optional[Hash] $oneagent_communication_hash = $dynatraceoneagent::params::oneagent_communication_hash,
-  Optional[Boolean] $log_monitoring           = $dynatraceoneagent::params::log_monitoring,
-  Optional[Boolean] $log_access               = $dynatraceoneagent::params::log_access,
-  Optional[String] $host_group                = $dynatraceoneagent::params::host_group,
-  Optional[Array] $host_tags                  = $dynatraceoneagent::params::host_tags,
-  Optional[Array] $host_metadata              = $dynatraceoneagent::params::host_metadata,
-  Optional[String] $hostname                  = $dynatraceoneagent::params::hostname,
-  # Optional[Boolean] $infra_only               = $dynatraceoneagent::params::infra_only,
-  Enum['infra-only', 'fullstack', 'discovery'] $monitoring_mode = $dynatraceoneagent::params::monitoring_mode,
-  Optional[String] $network_zone              = $dynatraceoneagent::params::network_zone,
-  String $oneagent_ctl                        = $dynatraceoneagent::params::oneagent_ctl,
-  String $oneagent_puppet_conf_dir            = $dynatraceoneagent::params::oneagent_puppet_conf_dir,
-  String $oneagent_comms_config_file          = $dynatraceoneagent::params::oneagent_comms_config_file,
-  String $oneagent_logmonitoring_config_file  = $dynatraceoneagent::params::oneagent_logmonitoring_config_file,
-  String $oneagent_logaccess_config_file      = $dynatraceoneagent::params::oneagent_logaccess_config_file,
-  String $hostgroup_config_file               = $dynatraceoneagent::params::hostgroup_config_file,
-  String $hostautotag_config_file             = $dynatraceoneagent::params::hostautotag_config_file,
-  String $hostmetadata_config_file            = $dynatraceoneagent::params::hostmetadata_config_file,
-  String $hostname_config_file                = $dynatraceoneagent::params::hostname_config_file,
-  String $oneagent_monitoring_mode_config_file      = $dynatraceoneagent::params::oneagent_monitoring_mode_config_file,
-  String $oneagent_networkzone_config_file    = $dynatraceoneagent::params::oneagent_networkzone_config_file,
+  # --- Host config parameters (now “unmanaged unless defined”) ---
+  Hash[String, String]                            $oneagent_communication_hash = $dynatraceoneagent::params::oneagent_communication_hash,
+  Optional[Boolean]                               $log_monitoring  = $dynatraceoneagent::params::log_monitoring,
+  Optional[Boolean]                               $log_access      = $dynatraceoneagent::params::log_access,
+  Optional[String]                                $host_group      = $dynatraceoneagent::params::host_group,
+  Array[String]                                   $host_tags       = $dynatraceoneagent::params::host_tags,
+  Array[String]                                   $host_metadata   = $dynatraceoneagent::params::host_metadata,
+  Optional[String]                                $hostname        = $dynatraceoneagent::params::hostname,
+  Optional[Enum['infra-only','fullstack','discovery']] $monitoring_mode = $dynatraceoneagent::params::monitoring_mode,
+  Optional[String]                                $network_zone    = $dynatraceoneagent::params::network_zone,
+
+  # --- Paths & files ---
+  String $oneagent_ctl                 = $dynatraceoneagent::params::oneagent_ctl,
+  String $oneagent_puppet_conf_dir     = $dynatraceoneagent::params::oneagent_puppet_conf_dir,
+  String $oneagent_comms_config_file   = $dynatraceoneagent::params::oneagent_comms_config_file,
+  String $oneagent_logmonitoring_config_file = $dynatraceoneagent::params::oneagent_logmonitoring_config_file,
+  String $oneagent_logaccess_config_file     = $dynatraceoneagent::params::oneagent_logaccess_config_file,
+  String $hostgroup_config_file        = $dynatraceoneagent::params::hostgroup_config_file,
+  String $hostautotag_config_file      = $dynatraceoneagent::params::hostautotag_config_file,
+  String $hostmetadata_config_file     = $dynatraceoneagent::params::hostmetadata_config_file,
+  String $hostname_config_file         = $dynatraceoneagent::params::hostname_config_file,
+  String $oneagent_monitoring_mode_config_file = $dynatraceoneagent::params::oneagent_monitoring_mode_config_file,
+  String $oneagent_networkzone_config_file     = $dynatraceoneagent::params::oneagent_networkzone_config_file,
+
+  # NOTE: Don’t rebuild this in init.pp—`params.pp` already builds it conditionally
+  Hash[String, String] $oneagent_params_hash = $dynatraceoneagent::params::oneagent_params_hash,
 ) inherits dynatraceoneagent::params {
 
-  # Build install parameters hash inside the class body
-  $oneagent_params_hash = {
-    '--set-monitoring-mode'        => $monitoring_mode,
-    '--set-app-log-content-access' => 'true',
-  }
-
+  # --- OS-specific derivations that the sub-classes rely on ---
   if $facts['kernel'] == 'Linux' {
     $os_type = 'unix'
-  } elsif $facts['os']['family']  == 'AIX' {
+  } elsif $facts['os']['family'] == 'AIX' {
     $os_type = 'aix'
   }
 
-  if $oneagent_params_hash['INSTALL_PATH'] {
-    $install_dir = $oneagent_params_hash['INSTALL_PATH']
-  } else {
-    $install_dir = $default_install_dir
-  }
-
-  if $version == 'latest' {
-    $download_link  = "${tenant_url}${api_path}${os_type}/${installer_type}/latest/?Api-Token=${paas_token}&arch=${arch}"
-  } else {
-    $download_link  = "${tenant_url}${api_path}${os_type}/${installer_type}/version/${version}?Api-Token=${paas_token}&arch=${arch}"
-  }
-
+  # Compute filename & download_path here (sub-classes will use them via the class scope)
   if $facts['os']['family'] == 'Windows' {
-    $filename                = "Dynatrace-OneAgent-${facts['os']['family']}-${version}.exe"
-    $download_path           = "${download_dir}\\${filename}"
-    $oneagent_tools_dir      = "${install_dir}\\agent\\tools"
-  } elsif ($facts['kernel'] == 'Linux') or ($facts['os']['family']  == 'AIX') {
-    $filename                 = "Dynatrace-OneAgent-${facts['kernel']}-${version}.sh"
-    $download_path            = "${download_dir}/${filename}"
-    $dt_root_cert             = "${download_dir}/${cert_file_name}"
-    $oneagent_params_array    = $oneagent_params_hash.map |$key,$value| { "${key}=${value}" }
-    $oneagent_unix_params     = join($oneagent_params_array, ' ' )
-    $command                  = "/bin/sh ${download_path} ${oneagent_unix_params}"
-    $oneagent_tools_dir       = "${install_dir}/agent/tools"
-  }
-
-  if $package_state != 'absent' {
-    contain dynatraceoneagent::download
-    contain dynatraceoneagent::install
-    contain dynatraceoneagent::config
-    contain dynatraceoneagent::service
-
-    Class['dynatraceoneagent::download']
-    -> Class['dynatraceoneagent::install']
-    -> Class['dynatraceoneagent::config']
-    -> Class['dynatraceoneagent::service']
+    $filename      = "Dynatrace-OneAgent-${facts['os']['family']}-${version}.exe"
+    $download_path = "${download_dir}\\${filename}"
+    $install_dir   = $default_install_dir
   } else {
-    contain dynatraceoneagent::uninstall
-
-    Class['dynatraceoneagent::uninstall']
+    $filename      = "Dynatrace-OneAgent-${facts['kernel']}-${version}.sh"
+    $download_path = "${download_dir}/${filename}"
+    $install_dir   = $default_install_dir
   }
+	# Derive OneAgent tools path for sub-classes (config.pp expects it)
+	if $facts['os']['family'] == 'Windows' {
+  	$oneagent_tools_dir = "${install_dir}\\agent\\tools"
+	} else {
+  	$oneagent_tools_dir = "${install_dir}/agent/tools"
+	}
+
+  # Build the API download link (used by ::download)
+  if $version == 'latest' {
+    $download_link = "${tenant_url}${api_path}${os_type}/${installer_type}/latest/?Api-Token=${paas_token}&arch=${arch}"
+  } else {
+    $download_link = "${tenant_url}${api_path}${os_type}/${installer_type}/version/${version}?Api-Token=${paas_token}&arch=${arch}"
+  }
+
+  # --- Class ordering ---
+  contain dynatraceoneagent::download
+  contain dynatraceoneagent::install
+  contain dynatraceoneagent::config
+  contain dynatraceoneagent::service
+
+  Class['dynatraceoneagent::download']
+  -> Class['dynatraceoneagent::install']
+  -> Class['dynatraceoneagent::config']
+  -> Class['dynatraceoneagent::service']
 }

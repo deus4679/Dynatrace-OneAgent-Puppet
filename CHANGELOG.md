@@ -1,6 +1,50 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## Release 1.12.0
+
+### Features
+
+- **Safe “unmanaged on absence” policy**
+  - Removing parameters from Puppet **no longer clears Dynatrace values** for Host Group, tags, metadata, hostname, network zone, or monitoring mode.
+  - When a parameter is omitted, the module only removes its *tracking file* and leaves the agent setting as‑is (Dynatrace UI/tenant defaults remain the source of truth).  
+
+- **Explicit, opt‑in monitoring mode**
+  - `monitoring_mode` now defaults to `undef`. If you **set** it (`infra-only` | `fullstack` | `discovery`), the module **sets it once** post‑install; if you **omit** it, the installer inherits the **tenant default** mode and Puppet stays hands‑off thereafter.
+
+- **Documentation refresh**
+  - Rewrote README with clear policy (“define → set once; omit → unmanaged”), quick start, advanced usage, and operational notes.
+
+### Changes
+
+- **Fresh-install refactor**
+  - Build the installer command **locally in `install.pp`** and run with `cwd => download_dir` and a robust guard:
+    ```puppet
+    unless => "test -x /opt/dynatrace/oneagent/agent/tools/oneagentctl"
+    ```
+    This ensures the installer executes only when OneAgent is truly absent and resolves prior evaluation issues when referencing variables across classes.
+
+- **Removed destructive execs**
+  - Deleted all `unset_*` exec resources and their `notify` links. The module no longer issues `oneagentctl` “clear” calls when parameters are absent.
+
+- **Parameter typing & scope clean-up**
+  - `monitoring_mode` → `Optional[Enum['infra-only','fullstack','discovery']]`.
+  - `host_tags` / `host_metadata` → `Array[String]` (defaults `[]`).
+  - `oneagent_communication_hash` → `Hash[String, String]` (default `{}`).
+  - Defined `$oneagent_tools_dir` in `init.pp` class body for clean cross‑class use.
+
+### Bugfixes
+
+- **Install-time “Could not evaluate” on fresh nodes**
+  - Resolved by avoiding undefined cross-class locals (`$dynatraceoneagent::command`) and constructing the command inside `install.pp`.
+  - Ensured `path => ['/bin','/usr/bin','/sbin','/usr/sbin']` so `/bin/sh` is always found.
+
+### Upgrade Notes
+
+- **Behavioral change (safer defaults):** If your workflow relied on Puppet **clearing** Host Group/tags/metadata/hostname/network zone when you removed parameters, you must now clear them **explicitly** via Dynatrace UI or by adding your own opt‑in purge switches.
+- **Monitoring mode:** Leaving `monitoring_mode` unset means Puppet will not enforce it; Dynatrace admins can change it in the UI and it will stick. Set it in PE only when you want Puppet to set it (one-time).
+- **No continuous enforcement by default:** Post‑install execs are `refreshonly`. If you want Puppet to **continuously** re-enforce certain values, add `unless` guards that read from `oneagentctl --get-*` and set `refreshonly => false` for those specific execs.
+
 ## Release 1.11.0
 
 ### Features

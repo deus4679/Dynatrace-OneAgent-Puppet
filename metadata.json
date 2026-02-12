@@ -1,6 +1,6 @@
 {
   "name": "deus-dynatraceoneagent",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "author": "Ernesto Deus",
   "summary": "This puppet module downloads and installs the dynatrace OneAgent agent on windows, linux and AIX systems",
   "license": "Apache-2.0",

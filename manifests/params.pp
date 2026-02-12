@@ -29,17 +29,21 @@ class dynatraceoneagent::params {
   $host_group                  = undef
   #$infra_only                  = undef
   # Removed infra_only and replaced with monitoring mode - 11/09/2025
-  $monitoring_mode             = fullstack  # choose an appropriate default [ fullstack | infra-only | discovery ]
+  # WARNING: If you set `monitoring_mode` here, Puppet will enforce it post-install
+  # (overriding the current mode from the Dynatrace UI). Leave `undef` to inherit
+  # the tenant default at install time and keep post-install unmanaged.
+  $monitoring_mode             = undef  # choose an appropriate default [ fullstack | infra-only | discovery ]
   $network_zone                = undef
 
   # OneAgent Install Parameters
   # Removed infra_only and replaced with monitoring mode - 11/09/2025
-  $oneagent_params_hash = {
-    #'--set-infra-only'             => 'false',
-    #'--set-app-log-content-access' => 'true',
-    '--set-monitoring-mode'        => $monitoring_mode,
-    '--set-app-log-content-access' => 'true',
-  }
+  # Installer parameters: only pass --set-monitoring-mode if explicitly set
+	$oneagent_params_hash = {
+  	'--set-app-log-content-access' => 'true',
+	} + ($monitoring_mode ? {
+  	undef   => {},
+  	default => { '--set-monitoring-mode' => $monitoring_mode },
+	})
   $reboot_system      = false
   $service_state      = 'running'
   $manage_service     = true
