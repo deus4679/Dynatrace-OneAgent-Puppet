@@ -42,6 +42,7 @@ class dynatraceoneagent::download {
       proxy_server     => $proxy_server,
       cleanup          => false,
       download_options => $download_options,
+      temp_dir         => $download_dir,
     }
   }
 
